@@ -68,12 +68,12 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    free-tier-node-group = {
+    eyego-node-group = {
       desired_size = 1
       max_size     = 2
       min_size     = 1
 
-      instance_types = ["t3.micro"]
+      instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
     }
   }

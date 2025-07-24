@@ -13,7 +13,9 @@ pipeline {
     stage('Checkout Code Repository') {
       steps {
         git branch: BRANCH_NAME, credentialsId: 'github_token', url: GIT_REPO_URL
-        env.IMAGE = "${DOCKER_HUB_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+        script {
+           env.IMAGE = "${env.DOCKER_HUB_REPO}/${env.IMAGE_NAME}:${env.IMAGE_TAG}"
+        }
       }
     }
 
@@ -44,7 +46,7 @@ pipeline {
                 script {
                         sh """
                            docker push ${env.IMAGE}
-               cx          """
+                        """
                 }
             }
         }
@@ -73,7 +75,8 @@ pipeline {
         )]) {
           script {
             sh '''
-              aws eks update-kubeconfig --region us-east-2 --name eyego-cluster
+              aws eks wait cluster-active --region us-east-2 --name eyego-eks
+              aws eks update-kubeconfig --region us-east-2 --name eyego-eks
               kubectl apply -f k8s/
             '''
           }

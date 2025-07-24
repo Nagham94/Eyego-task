@@ -62,7 +62,7 @@ module "eks" {
 
   eks_managed_node_group_defaults = {
     ami_type       = "AL2023_x86_64_STANDARD"
-    instance_types = ["t3.micro"]
+    instance_types = ["t3.medium"]
     disk_size      = 10
     attach_cluster_primary_security_group = true
   }

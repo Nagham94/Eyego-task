@@ -1,0 +1,93 @@
+pipeline {
+  agent any
+
+  environment {
+    GIT_REPO_URL = 'https://github.com/Nagham94/Eyego-task.git' 
+    BRANCH_NAME = "main"
+    DOCKER_HUB_REPO = 'nagham94' 
+    IMAGE_NAME = "eyego-image" 
+    IMAGE_TAG = 'latest'
+  }
+
+  stages {
+    stage('Checkout Code Repository') {
+      steps {
+        git branch: BRANCH_NAME, credentialsId: 'github_token', url: GIT_REPO_URL
+        env.IMAGE = "${DOCKER_HUB_REPO}/${IMAGE_NAME}:${IMAGE_TAG}"
+      }
+    }
+
+    stage('Build Docker Image') {
+            steps {
+                script {
+                    sh """
+                        docker build -t ${env.IMAGE} .
+                    """
+                }
+            }
+        }
+
+    stage('Login to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh '''
+                            docker login -u "$DOCKER_USER" --password "$DOCKER_PASS"
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Push Docker Images to Docker Hub') {
+            steps {
+                script {
+                        sh """
+                           docker push ${env.IMAGE}
+               cx          """
+                }
+            }
+        }
+
+        stage('create cluster') {
+            steps {
+                 withCredentials([usernamePassword(
+                    credentialsId: 'aws-credentials', 
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                )]) {
+                        sh """
+                           terraform init -reconfigure
+                           terraform apply -auto-approve
+                        """
+                }
+            }
+        }
+
+        stage('Deploy to EKS Cluster') {
+      steps {
+        withCredentials([usernamePassword(
+          credentialsId: 'aws-credentials', 
+          usernameVariable: 'AWS_ACCESS_KEY_ID',
+          passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+        )]) {
+          script {
+            sh '''
+              aws eks update-kubeconfig --region us-east-2 --name eyego-cluster
+              kubectl apply -f k8s/
+            '''
+          }
+        }
+      }
+    }
+  }
+
+  post {
+      always {
+        script {
+        sh "docker rmi -f ${env.IMAGE} || true"
+        sh "docker image prune -f"
+        }
+      }
+  }
+}

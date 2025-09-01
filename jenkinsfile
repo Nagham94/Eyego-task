@@ -2,10 +2,10 @@ pipeline {
   agent any
 
   environment {
-    GIT_REPO_URL = 'https://github.com/Nagham94/Eyego-task.git' 
+    GIT_REPO_URL = 'https://github.com/Nagham94/EKS-task.git' 
     BRANCH_NAME = "main"
     DOCKER_HUB_REPO = 'nagham94' 
-    IMAGE_NAME = "eyego-image" 
+    IMAGE_NAME = "nagham-image" 
     IMAGE_TAG = 'latest'
   }
 
@@ -75,8 +75,8 @@ pipeline {
         )]) {
           script {
             sh '''
-              aws eks wait cluster-active --region us-east-2 --name eyego-eks
-              aws eks update-kubeconfig --region us-east-2 --name eyego-eks
+              aws eks wait cluster-active --region us-east-2 --name nagham-eks
+              aws eks update-kubeconfig --region us-east-2 --name nagham-eks
               kubectl apply -f k8s/
             '''
           }

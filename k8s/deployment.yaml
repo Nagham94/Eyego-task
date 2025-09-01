@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eyego-deployment
+  name: nagham-deployment
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: eyego
+      app: nagham
   template:
     metadata:
       labels:
-        app: eyego
+        app: nagham
     spec:
       containers:
-      - name: eyego
-        image: nagham94/eyego-image:latest
+      - name: nagham
+        image: nagham94/nagham-image:latest
         ports:
         - containerPort: 3000

@@ -56,7 +56,7 @@ provider "google" {
 }
 
 resource "google_container_cluster" "primary" {
-  name     = eyego-cluster
+  name     = nagham-cluster
   location = us-central1
   initial_node_count = 1
   ...
@@ -82,7 +82,7 @@ provider "alicloud" {
 }
 
 resource "alicloud_cs_managed_kubernetes_cluster" "ack_cluster" {
-  name = eyego-cluster
+  name = nagham-cluster
   ...
 }
 In main.tf:
@@ -151,7 +151,7 @@ stage('Deploy to GKE') {
             sh '''
               export GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
               gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
-              gcloud container clusters get-credentials eyego-cluster --region us-central1
+              gcloud container clusters get-credentials nagham-cluster --region us-central1
               kubectl apply -f k8s/
             '''
         }
@@ -171,7 +171,7 @@ stage('Deploy to ACK') {
           )
         ]) {
             sh '''
-              aliyun configure set --profile eyego --access-key-id $ALICLOUD_ACCESS_KEY --access-key-secret $ALICLOUD_SECRET_KEY --region cn-hangzhou
+              aliyun configure set --profile nagham --access-key-id $ALICLOUD_ACCESS_KEY --access-key-secret $ALICLOUD_SECRET_KEY --region cn-hangzhou
               aliyun cs DescribeKubernetesClusterConfig --ClusterId $(aliyun cs DescribeClusters | jq -r '.[0].cluster_id') > kubeconfig.yaml
               export KUBECONFIG=$(pwd)/kubeconfig.yaml
               kubectl apply -f k8s/
@@ -212,3 +212,4 @@ Jenkins Docs
 Jenkins Credentials Plugin
 
 Using Terraform with Jenkins
+
